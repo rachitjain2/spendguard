@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import Sidebar from './components/Sidebar'
 import MetricsHeader from './components/MetricsHeader'
 import BillingChart from './components/BillingChart'
@@ -8,87 +8,70 @@ import IntegrationPortal from './components/IntegrationPortal'
 const initialAlerts = [
   {
     id: 1,
+    severity: 'critical',
     title: 'Rogue OpenAI API Key Loop Detected',
-    description: 'Org ID: prod-hx9. Latency overhead: 400 req/min.',
+    details: 'Org ID: prod-hx9. Latency overhead: 400req/min.',
     cost: 180,
     costUnit: '/ hr',
-    type: 'critical',
-    icon: 'bot',
     action: 'Isolate Threat',
   },
   {
     id: 2,
+    severity: 'warning',
     title: 'Zombie Seats Detected on Abstract CRM',
-    description: '4 seats assigned to ex-employees (@company.com).',
+    details: '4 seats assigned to ex-employees (@company.com).',
     cost: 320,
     costUnit: '/ mo',
-    type: 'warning',
-    icon: 'user-x',
-    action: 'Isolate Threat',
+    action: 'Claim Savings',
   },
   {
     id: 3,
+    severity: 'optimized',
     title: 'Unused Tier Upgrade Threshold',
-    description: 'AWS S3 storage at 5% usage on premium data tier.',
+    details: 'AWS S3 storage sitting at 5% usage capacity on a premium data tier.',
     cost: 450,
     costUnit: '/ mo',
-    type: 'optimized',
-    icon: 'server',
     action: 'Claim Savings',
   },
 ]
 
-function App() {
+export default function App() {
   const [activeTab, setActiveTab] = useState('overview')
   const [alerts, setAlerts] = useState(initialAlerts)
-  const [autoKillEnabled, setAutoKillEnabled] = useState(false)
-  const [capitalReclaimed, setCapitalReclaimed] = useState(0)
-  const [isScanning, setIsScanning] = useState(true)
+  const [totalRecovered, setTotalRecovered] = useState(0)
+  const [autoKill, setAutoKill] = useState(false)
 
-  const identifiedLeaks = alerts.length
-  const recoverableArr = useMemo(() => {
-    return alerts.reduce((sum, a) => sum + a.cost * 12, 0)
-  }, [alerts])
-
-  const handleResolveAlert = (alert) => {
-    setAlerts((prev) => prev.filter((a) => a.id !== alert.id))
-    setCapitalReclaimed((prev) => prev + alert.cost * 12)
+  const handleDismissAlert = (id) => {
+    const alert = alerts.find((a) => a.id === id)
+    if (alert) {
+      const annualCost = alert.severity === 'critical' ? alert.cost * 24 * 365 : alert.cost * 12
+      setTotalRecovered((prev) => prev + annualCost)
+    }
+    setAlerts((prev) => prev.filter((a) => a.id !== id))
   }
 
-  const handleToggleScan = () => setIsScanning((prev) => !prev)
-  const handleToggleAutoKill = () => setAutoKillEnabled((prev) => !prev)
-
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex">
+    <div className="flex min-h-screen bg-slate-950">
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <main className="flex-1 p-6 overflow-y-auto">
+      <main className="flex-1 p-8 overflow-y-auto">
         <MetricsHeader
-          identifiedLeaks={identifiedLeaks}
-          recoverableArr={recoverableArr}
-          isScanning={isScanning}
-          onToggleScan={handleToggleScan}
-          capitalReclaimed={capitalReclaimed}
+          alerts={alerts}
+          alertsCount={alerts.length}
+          totalRecovered={totalRecovered}
         />
 
-        <div className="grid grid-cols-3 gap-4 mt-6">
-          <div className="col-span-2">
-            <BillingChart
-              autoKillEnabled={autoKillEnabled}
-              onToggleAutoKill={handleToggleAutoKill}
-            />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          <div className="lg:col-span-2">
+            <BillingChart autoKill={autoKill} onToggleAutoKill={() => setAutoKill((p) => !p)} />
           </div>
-          <div className="col-span-1">
-            <AnomalyFeed alerts={alerts} onResolveAlert={handleResolveAlert} />
+          <div className="lg:col-span-1">
+            <AnomalyFeed alerts={alerts} onDismissAlert={handleDismissAlert} />
           </div>
         </div>
 
-        <div className="mt-4">
-          <IntegrationPortal />
-        </div>
+        <IntegrationPortal />
       </main>
     </div>
   )
 }
-
-export default App

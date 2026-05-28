@@ -1,99 +1,160 @@
-import { DollarSign, AlertTriangle, TrendingUp, ShieldCheck, TrendingDown } from 'lucide-react'
+import { DollarSign, Bug, TrendingUp, ShieldAlert } from 'lucide-react'
 
-export default function MetricsHeader({ identifiedLeaks, recoverableArr, isScanning, onToggleScan, capitalReclaimed }) {
-  const stats = [
-    {
-      label: 'Total Monthly Spend',
-      value: '$14,240',
-      icon: DollarSign,
-      trend: { label: '+12.4%', up: true },
-      color: 'text-slate-100',
+const kpiCards = [
+  {
+    id: 'spend',
+    label: 'Total Monthly Spend',
+    icon: DollarSign,
+    value: '$14,240',
+    trend: { value: '+12.4%', direction: 'up' },
+    color: 'blue',
+  },
+  {
+    id: 'leaks',
+    label: 'Identified Billing Leaks',
+    icon: Bug,
+    value: null,
+    trend: null,
+    color: 'rose',
+    dynamic: true,
+  },
+  {
+    id: 'recoverable',
+    label: 'Recoverable ARR',
+    icon: TrendingUp,
+    value: null,
+    trend: null,
+    color: 'emerald',
+    dynamic: true,
+  },
+  {
+    id: 'guardrail',
+    label: 'Guardrail Protection',
+    icon: ShieldAlert,
+    value: null,
+    trend: null,
+    color: 'amber',
+    dynamic: true,
+  },
+]
+
+const colorStyles = {
+  blue: { icon: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+  rose: { icon: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
+  emerald: { icon: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+  amber: { icon: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+}
+
+export default function MetricsHeader({ alerts, alertsCount, totalRecovered }) {
+  const totalLeakCost = alerts.reduce((sum, a) => sum + a.cost, 0)
+  const recoverableArr = totalLeakCost * 12
+  const guardrailState = alerts.length > 0 ? 'Active Scanning' : 'Bypassed / High Risk'
+  const guardrailStateColor = alerts.length > 0 ? 'emerald' : 'rose'
+
+  const dynamicValues = {
+    leaks: { value: String(alertsCount), sub: 'active incidents' },
+    recoverable: { value: `$${recoverableArr.toLocaleString()}`, sub: '/yr projected' },
+    guardrail: {
+      value: guardrailState,
+      badge: guardrailStateColor === 'emerald' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+      pulseDot: guardrailStateColor === 'emerald',
     },
-    {
-      label: 'Identified Billing Leaks',
-      value: identifiedLeaks,
-      icon: AlertTriangle,
-      trend: { label: `${identifiedLeaks} active`, up: identifiedLeaks > 0 },
-      color: identifiedLeaks > 0 ? 'text-amber-400' : 'text-emerald-400',
-    },
-    {
-      label: 'Recoverable ARR',
-      value: `$${recoverableArr.toLocaleString()}`,
-      icon: TrendingUp,
-      trend: { label: '/ year', up: true },
-      color: 'text-emerald-400',
-    },
-    {
-      label: 'Guardrail Protection',
-      value: isScanning ? 'Active Scanning' : 'Bypassed',
-      icon: ShieldCheck,
-      toggle: true,
-      color: isScanning ? 'text-emerald-400' : 'text-red-400',
-      badge: isScanning ? 'Live' : 'High Risk',
-      badgeColor: isScanning ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400',
-    },
-  ]
+  }
 
   return (
-    <div className="space-y-4">
-      {capitalReclaimed > 0 && (
-        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-5 py-3 flex items-center gap-3 animate-flash">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-            <TrendingDown className="w-5 h-5 text-emerald-400" />
+    <>
+      {totalRecovered > 0 && (
+        <div className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-sm animate-in slide-in-from-top-2">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-emerald-400">
+                Total Capital Reclaimed
+              </p>
+              <p className="text-2xl font-extrabold tracking-tight text-white">
+                ${totalRecovered.toLocaleString()}
+              </p>
+            </div>
           </div>
-          <p className="text-emerald-300 font-medium text-sm">
-            Total Capital Reclaimed: <span className="text-emerald-200 font-bold">${capitalReclaimed.toLocaleString()}</span>
-          </p>
         </div>
       )}
 
-      <div className="grid grid-cols-4 gap-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        {kpiCards.map((card) => {
+          const cs = colorStyles[card.color]
+          const Icon = card.icon
+
+          if (card.dynamic) {
+            const dyn = dynamicValues[card.id]
+            if (card.id === 'guardrail') {
+              return (
+                <div
+                  key={card.id}
+                  className="bg-slate-900/50 backdrop-blur-md border border-slate-800/80 rounded-xl p-5 transition-all duration-300 hover:border-slate-700/80 hover:translate-y-[-2px] shadow-xl shadow-black/40"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`w-10 h-10 rounded-lg ${cs.bg} border ${cs.border} flex items-center justify-center`}>
+                      <Icon className={`w-5 h-5 ${cs.icon}`} />
+                    </div>
+                    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${dyn.badge}`}>
+                      {dyn.pulseDot && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-dot" />}
+                      {!dyn.pulseDot && <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />}
+                      {dyn.value}
+                    </div>
+                  </div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">{card.label}</p>
+                  <p className="text-lg font-extrabold tracking-tight text-white">{dyn.value}</p>
+                </div>
+              )
+            }
+
+            return (
+              <div
+                key={card.id}
+                className="bg-slate-900/50 backdrop-blur-md border border-slate-800/80 rounded-xl p-5 transition-all duration-300 hover:border-slate-700/80 hover:translate-y-[-2px] shadow-xl shadow-black/40"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`w-10 h-10 rounded-lg ${cs.bg} border ${cs.border} flex items-center justify-center`}>
+                    <Icon className={`w-5 h-5 ${cs.icon}`} />
+                  </div>
+                  {dyn.sub && (
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500">{dyn.sub}</span>
+                  )}
+                </div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">{card.label}</p>
+                <p className="text-lg font-extrabold tracking-tight text-white">{dyn.value}</p>
+              </div>
+            )
+          }
+
           return (
             <div
-              key={stat.label}
-              className="bg-slate-900/60 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-colors"
+              key={card.id}
+              className="bg-slate-900/50 backdrop-blur-md border border-slate-800/80 rounded-xl p-5 transition-all duration-300 hover:border-slate-700/80 hover:translate-y-[-2px] shadow-xl shadow-black/40"
             >
-              <div className="flex items-start justify-between mb-3">
-                <span className="text-slate-500 text-xs font-medium uppercase tracking-wider">{stat.label}</span>
-                <div className={`p-2 rounded-lg bg-slate-800/80 ${stat.color}`}>
-                  <Icon className="w-4 h-4" />
+              <div className="flex items-center justify-between mb-3">
+                <div className={`w-10 h-10 rounded-lg ${cs.bg} border ${cs.border} flex items-center justify-center`}>
+                  <Icon className={`w-5 h-5 ${cs.icon}`} />
                 </div>
-              </div>
-              <div className={`text-2xl font-bold tracking-tight ${stat.color}`}>
-                {stat.value}
-              </div>
-              <div className="flex items-center gap-2 mt-2">
-                {stat.trend && (
-                  <span className={`text-xs font-medium flex items-center gap-1 ${stat.trend.up ? 'text-emerald-400' : 'text-red-400'}`}>
-                    {stat.trend.up ? '↑' : '↓'} {stat.trend.label}
+                {card.trend && (
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                    card.trend.direction === 'up'
+                      ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                      : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${card.trend.direction === 'up' ? 'bg-rose-400' : 'bg-emerald-400'}`} />
+                    {card.trend.value}
                   </span>
                 )}
-                {stat.badge && (
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${stat.badgeColor}`}>
-                    {stat.badge}
-                  </span>
-                )}
-                {stat.toggle && (
-                  <button
-                    onClick={onToggleScan}
-                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-300 ${
-                      isScanning ? 'bg-emerald-500' : 'bg-slate-700'
-                    }`}
-                  >
-                    <span
-                      className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform duration-300 ${
-                        isScanning ? 'translate-x-4.5' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
-                )}
               </div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">{card.label}</p>
+              <p className="text-2xl font-extrabold tracking-tight text-white">{card.value}</p>
             </div>
           )
         })}
       </div>
-    </div>
+    </>
   )
 }
