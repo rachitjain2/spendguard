@@ -9,6 +9,8 @@
   --color-slate-100: #f1f5f9;
 }
 
+@variant dark (&:where(.dark, .dark *));
+
 *,
 *::before,
 *::after {
@@ -21,17 +23,26 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  background: #020617;
-  color: #f1f5f9;
+  background: #f8fafc;
+  color: #0f172a;
 }
 
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: radial-gradient(ellipse at top, #0f172a 0%, #020617 50%, #000000 100%);
+  background: radial-gradient(ellipse at top, #e2e8f0 0%, #f8fafc 50%, #f1f5f9 100%);
   pointer-events: none;
   z-index: -1;
+}
+
+html.dark body {
+  background: #020617;
+  color: #f1f5f9;
+}
+
+html.dark body::before {
+  background: radial-gradient(ellipse at top, #0f172a 0%, #020617 50%, #000000 100%);
 }
 
 #root {

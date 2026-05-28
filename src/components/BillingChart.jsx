@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts'
@@ -33,18 +33,12 @@ function generateStripe() {
   }))
 }
 
-const PROFILES = [
-  { id: 'openai', name: 'OpenAI Infrastructure', data: generateOpenAI(), color: '#3b82f6' },
-  { id: 'aws', name: 'AWS Elastic Compute', data: generateAWS(), color: '#f59e0b' },
-  { id: 'stripe', name: 'Stripe Transactional Fees', data: generateStripe(), color: '#10b981' },
-]
-
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl px-4 py-3 shadow-2xl shadow-black/60">
-      <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">{label}</p>
-      <p className="text-lg font-extrabold tracking-tight text-white">
+    <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700/80 rounded-xl px-4 py-3 shadow-2xl shadow-black/5 dark:shadow-black/60">
+      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">{label}</p>
+      <p className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-white">
         ${payload[0].value.toLocaleString()}
       </p>
     </div>
@@ -54,24 +48,42 @@ function CustomTooltip({ active, payload, label }) {
 export default function BillingChart({ autoKill, onToggleAutoKill }) {
   const [profileIndex, setProfileIndex] = useState(0)
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [budgetCap, setBudgetCap] = useState(4000)
+
+  const openaiData = useMemo(() => generateOpenAI(), [])
+  const awsData = useMemo(() => generateAWS(), [])
+  const stripeData = useMemo(() => generateStripe(), [])
+
+  const PROFILES = useMemo(() => [
+    { id: 'openai', name: 'OpenAI Infrastructure', data: openaiData, color: '#3b82f6' },
+    { id: 'aws', name: 'AWS Elastic Compute', data: awsData, color: '#f59e0b' },
+    { id: 'stripe', name: 'Stripe Transactional Fees', data: stripeData, color: '#10b981' },
+  ], [openaiData, awsData, stripeData])
+
   const profile = PROFILES[profileIndex]
-  const budgetCap = 4000
+
+  const handleBudgetChange = (e) => {
+    const val = parseInt(e.target.value, 10)
+    if (!isNaN(val) && val > 0) {
+      setBudgetCap(val)
+    }
+  }
 
   return (
-    <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800/80 rounded-xl p-6 transition-all duration-300 hover:border-slate-700/80 shadow-xl shadow-black/40">
+    <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-800/80 rounded-xl p-6 transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-700/80 shadow-xl shadow-black/5 dark:shadow-black/40">
       <div className="flex items-center justify-between mb-6">
         <div className="relative">
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/60 border border-slate-700/60 text-sm font-medium text-slate-200 hover:border-slate-600/60 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-sm font-medium text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600/60 transition-colors"
           >
             {profile.name}
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            <ChevronDown className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
           </button>
           {dropdownOpen && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
-              <div className="absolute top-full left-0 mt-1 w-56 z-20 bg-slate-900 border border-slate-700/80 rounded-xl overflow-hidden shadow-2xl shadow-black/60">
+              <div className="absolute top-full left-0 mt-1 w-56 z-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-xl overflow-hidden shadow-2xl shadow-black/5 dark:shadow-black/60">
                 {PROFILES.map((p, i) => (
                   <button
                     key={p.id}
@@ -79,7 +91,7 @@ export default function BillingChart({ autoKill, onToggleAutoKill }) {
                     className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
                       i === profileIndex
                         ? 'bg-blue-500/10 text-blue-400'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50'
                     }`}
                   >
                     {p.name}
@@ -90,22 +102,36 @@ export default function BillingChart({ autoKill, onToggleAutoKill }) {
           )}
         </div>
 
-        <label className="flex items-center gap-3 cursor-pointer">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Auto-Kill Budget Cap</span>
-          <button
-            onClick={onToggleAutoKill}
-            className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
-              autoKill ? 'bg-gradient-to-r from-blue-600 to-indigo-600' : 'bg-slate-700'
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${
-                autoKill ? 'translate-x-5' : 'translate-x-0'
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Auto-Kill Budget Cap</span>
+            <button
+              onClick={onToggleAutoKill}
+              className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
+                autoKill ? 'bg-gradient-to-r from-blue-600 to-indigo-600' : 'bg-slate-300 dark:bg-slate-700'
               }`}
-            />
-          </button>
-          <Zap className={`w-4 h-4 transition-colors duration-300 ${autoKill ? 'text-amber-400' : 'text-slate-600'}`} />
-        </label>
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${
+                  autoKill ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+            <Zap className={`w-4 h-4 transition-colors duration-300 ${autoKill ? 'text-amber-400' : 'text-slate-300 dark:text-slate-600'}`} />
+          </label>
+          {autoKill && (
+            <div className="flex items-center gap-1">
+              <span className="text-xs text-slate-500 dark:text-slate-400">$</span>
+              <input
+                type="number"
+                value={budgetCap}
+                onChange={handleBudgetChange}
+                min="1"
+                className="w-20 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-lg text-sm text-slate-700 dark:text-slate-200 px-2 py-1 focus:outline-none focus:border-blue-500/40"
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="h-[320px]">
