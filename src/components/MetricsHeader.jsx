@@ -39,10 +39,10 @@ const kpiCards = [
 ]
 
 const colorStyles = {
-  blue: { icon: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-  rose: { icon: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
-  emerald: { icon: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-  amber: { icon: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+  blue: { icon: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/20' },
+  rose: { icon: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20' },
+  emerald: { icon: 'text-success', bg: 'bg-success/10', border: 'border-success/20' },
+  amber: { icon: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20' },
 }
 
 function KpiCard({ icon: Icon, label, colorKey, badge, children }) {
@@ -55,7 +55,7 @@ function KpiCard({ icon: Icon, label, colorKey, badge, children }) {
         </div>
         {badge}
       </div>
-      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">{label}</p>
+      <p className="text-h4 text-slate-500 dark:text-slate-400 mb-1">{label}</p>
       {children}
     </div>
   )
@@ -65,33 +65,33 @@ export default function MetricsHeader({ alerts, alertsCount, totalRecovered }) {
   const totalLeakCost = alerts.reduce((sum, a) => sum + a.cost, 0)
   const recoverableArr = totalLeakCost * 12
   const guardrailState = alerts.length > 0 ? 'Active Scanning' : 'Bypassed / High Risk'
-  const guardrailStateColor = alerts.length > 0 ? 'emerald' : 'rose'
+  const guardrailStateColor = alerts.length > 0 ? 'success' : 'danger'
 
   const dynamicValues = {
     leaks: { value: String(alertsCount), sub: 'active incidents' },
     recoverable: { value: `$${recoverableArr.toLocaleString()}`, sub: '/yr projected' },
     guardrail: {
       value: guardrailState,
-      badge: guardrailStateColor === 'emerald' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20',
-      pulseDot: guardrailStateColor === 'emerald',
+      badge: guardrailStateColor === 'success' ? 'bg-success/10 text-success border-success/20' : 'bg-danger/10 text-danger border-danger/20',
+      pulseDot: guardrailStateColor === 'success',
     },
   }
 
   return (
     <>
       {totalRecovered > 0 && (
-        <div className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-sm animate-in slide-in-from-top-2">
+        <div className="mb-6 p-4 rounded-xl bg-success/10 border border-success/20 backdrop-blur-sm animate-in slide-in-from-top-2">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-              <TrendingUp className="w-4 h-4 text-emerald-400" />
+            <div className="w-8 h-8 rounded-lg bg-success/20 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 text-success" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-emerald-400">
+              <p className="text-h3 text-success">
                 Total Capital Reclaimed
               </p>
-              <p className="text-2xl font-extrabold tracking-tight text-white">
+              <h1 className="text-h1 text-white">
                 ${totalRecovered.toLocaleString()}
-              </p>
+              </h1>
             </div>
           </div>
         </div>
@@ -112,15 +112,15 @@ export default function MetricsHeader({ alerts, alertsCount, totalRecovered }) {
                   colorKey={card.color}
                   badge={
                     <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${dyn.badge}`}>
-                      {dyn.pulseDot && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-dot" />}
-                      {!dyn.pulseDot && <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />}
+                      {dyn.pulseDot && <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse-dot" />}
+                      {!dyn.pulseDot && <span className="w-1.5 h-1.5 rounded-full bg-danger" />}
                       {dyn.value}
                     </div>
                   }
                 >
-                  <p className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-white">
+                  <h2 className="text-h2">
                     {alerts.length > 0 ? '4 rules active' : '0 rules active'}
-                  </p>
+                  </h2>
                 </KpiCard>
               )
             }
@@ -132,10 +132,10 @@ export default function MetricsHeader({ alerts, alertsCount, totalRecovered }) {
                 label={card.label}
                 colorKey={card.color}
                 badge={dyn.sub && (
-                  <span className="text-[10px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">{dyn.sub}</span>
+                  <span className="text-caption uppercase tracking-wider">{dyn.sub}</span>
                 )}
               >
-                <p className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-white">{dyn.value}</p>
+                <h2 className="text-h2">{dyn.value}</h2>
               </KpiCard>
             )
           }
@@ -149,15 +149,15 @@ export default function MetricsHeader({ alerts, alertsCount, totalRecovered }) {
               badge={card.trend && (
                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                   card.trend.direction === 'up'
-                    ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                    : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    ? 'bg-danger/10 text-danger border border-danger/20'
+                    : 'bg-success/10 text-success border border-success/20'
                 }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${card.trend.direction === 'up' ? 'bg-rose-400' : 'bg-emerald-400'}`} />
+                  <span className={`w-1.5 h-1.5 rounded-full ${card.trend.direction === 'up' ? 'bg-danger' : 'bg-success'}`} />
                   {card.trend.value}
                 </span>
               )}
             >
-              <p className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">{card.value}</p>
+              <h1 className="text-h1">{card.value}</h1>
             </KpiCard>
           )
         })}

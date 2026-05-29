@@ -4,20 +4,20 @@ import { AlertTriangle, AlertCircle, CheckCircle, Zap, X } from 'lucide-react'
 const severityConfig = {
   critical: {
     icon: AlertCircle,
-    dot: 'bg-rose-500',
-    badge: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+    dot: 'bg-danger',
+    badge: 'bg-danger/10 text-danger border-danger/20',
     label: 'Critical',
   },
   warning: {
     icon: AlertTriangle,
-    dot: 'bg-amber-500',
-    badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    dot: 'bg-warning',
+    badge: 'bg-warning/10 text-warning border-warning/20',
     label: 'Warning',
   },
   optimized: {
     icon: CheckCircle,
-    dot: 'bg-emerald-500',
-    badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    dot: 'bg-success',
+    badge: 'bg-success/10 text-success border-success/20',
     label: 'Optimized',
   },
 }
@@ -62,8 +62,8 @@ export default function AnomalyFeed({ alerts, onDismissAlert, isLoading }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Live Anomaly Detection</h2>
-        <span className="text-[10px] font-medium text-slate-500 dark:text-slate-500 bg-slate-100 dark:bg-slate-800/60 px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700/50">
+        <h2 className="text-h4 text-slate-500 dark:text-slate-400">Live Anomaly Detection</h2>
+        <span className="text-caption bg-slate-100 dark:bg-slate-800/60 px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700/50">
           {alerts.length} active
         </span>
       </div>
@@ -76,11 +76,11 @@ export default function AnomalyFeed({ alerts, onDismissAlert, isLoading }) {
         </>
       ) : alerts.length === 0 ? (
         <div className="bg-white/80 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-800/60 rounded-xl p-8 text-center">
-          <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-3">
-            <CheckCircle className="w-6 h-6 text-emerald-400" />
+          <div className="w-12 h-12 rounded-full bg-success/10 border border-success/20 flex items-center justify-center mx-auto mb-3">
+            <CheckCircle className="w-6 h-6 text-success" />
           </div>
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">No active threats</p>
-          <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">All billing anomalies resolved</p>
+          <p className="text-h3 text-slate-700 dark:text-slate-300">No active threats</p>
+          <p className="text-caption mt-1">All billing anomalies resolved</p>
         </div>
       ) : (
         alerts.map((alert) => {
@@ -107,7 +107,7 @@ export default function AnomalyFeed({ alerts, onDismissAlert, isLoading }) {
                         {sev.label}
                       </span>
                     </div>
-                    <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-100 leading-snug">{alert.title}</h3>
+                    <h3 className="text-h3 leading-snug">{alert.title}</h3>
                   </div>
                 </div>
                 <button
@@ -118,18 +118,18 @@ export default function AnomalyFeed({ alerts, onDismissAlert, isLoading }) {
                 </button>
               </div>
 
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">{alert.details}</p>
+              <p className="text-body leading-relaxed mb-4">{alert.details}</p>
 
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Cost Impact</span>
-                  <p className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-white">
-                    ${alert.cost.toLocaleString()}<span className="text-xs font-medium text-slate-400 dark:text-slate-400">{alert.costUnit}</span>
+                  <span className="text-caption uppercase tracking-wider">Cost Impact</span>
+                  <p className="text-h2">
+                    ${alert.cost.toLocaleString()}<span className="text-caption font-medium">{alert.costUnit}</span>
                   </p>
                 </div>
                 <button
                   onClick={() => handleDismiss(alert.id)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-medium shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all rounded-lg"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-primary to-accent hover:from-primary/80 hover:to-accent/80 text-white text-xs font-medium shadow-lg shadow-primary/20 active:scale-[0.98] transition-all rounded-lg"
                 >
                   <Zap className="w-3.5 h-3.5" />
                   {alert.action}

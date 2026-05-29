@@ -1,6 +1,12 @@
 @import "tailwindcss";
 
 @theme {
+  --color-primary: #2563eb;
+  --color-secondary: #475569;
+  --color-accent: #db2777;
+  --color-success: #16a34a;
+  --color-warning: #f59e0b;
+  --color-danger: #dc2626;
   --color-slate-950: #020617;
   --color-slate-900: #0f172a;
   --color-slate-800: #1e293b;
@@ -61,6 +67,34 @@ html.dark body::before {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #334155;
+}
+
+@layer components {
+  .text-display {
+    @apply text-4xl font-extrabold tracking-tighter;
+  }
+  .text-h1 {
+    @apply text-2xl font-bold tracking-tight;
+  }
+  .text-h2 {
+    @apply text-lg font-semibold tracking-tight;
+  }
+  .text-h3 {
+    @apply text-sm font-semibold tracking-tight;
+  }
+  .text-h4 {
+    @apply text-xs font-semibold uppercase tracking-wider;
+  }
+  .text-body {
+    @apply text-sm text-slate-700 dark:text-slate-300;
+  }
+  .text-caption {
+    @apply text-xs text-slate-500 dark:text-slate-400;
+  }
+  h1, h2, h3, h4 {
+    @apply text-slate-900 dark:text-white;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
 }
 
 @keyframes pulse-dot {
